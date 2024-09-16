@@ -12,10 +12,7 @@ if not os.path.exists(UPLOAD_FOLDER):
 
 # Dummy predictor function (replace this with your actual model)
 def predictor(image_link, category_id, entity_name):
-    # Prediction logic with allowed units and standard formatting
-    unit = random.choice(['inch', 'centimetre', 'gram', 'ounce'])  # Example of allowed units
-    value = round(random.uniform(1.0, 20.0), 2)  # Random float value between 1 and 20
-    return f"{value} {unit}" if random.random() > 0.2 else ""  # 20% chance to return empty
+    return "10 inch" if random.random() > 0.5 else "5 inch"
 
 # Route for the home page
 @app.route('/')
@@ -40,7 +37,7 @@ def predict():
         data['prediction'] = data.apply(
             lambda row: predictor(row['image_link'], row['group_id'], row['entity_name']), axis=1)
         
-        # Save the predictions to a new CSV file with both index and prediction
+        # Save the predictions to a new CSV file
         output_filename = os.path.join(UPLOAD_FOLDER, 'test_out.csv')
         data[['index', 'prediction']].to_csv(output_filename, index=False)
         
