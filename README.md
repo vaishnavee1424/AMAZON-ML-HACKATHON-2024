@@ -7,7 +7,7 @@
 Amazon ML Challenge is a two-stage competition where students from all engineering campuses across India will get a unique opportunity to work on Amazon’s dataset to bring in fresh ideas and build innovative solutions for a real-world problem statement. The top three winning teams will receive pre-placement interviews (PPIs) for ML roles at Amazon along with cash prizes and certificates.
 
 ## Datset Link🔗
-[Click Here for the Datset](https://unstop.com/competitions/1100713/round/841339/play/code)
+[Click Here for the Datset](https://github.com/vaishnavee1424/AMAZON-ML-HACKATHON-2024/tree/main/dataset)
 
 ## Problem
 In this hackathon, the goal is to create a machine learning model that extracts entity values from images. This capability is crucial in fields like healthcare, e-commerce, and content moderation, where precise product information is vital. As digital marketplaces expand, many products lack detailed textual descriptions, making it essential to obtain key details directly from images. These images provide important information such as weight, volume, voltage, wattage, dimensions, and many more, which are critical for digital stores.
