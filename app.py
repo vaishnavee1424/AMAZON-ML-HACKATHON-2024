@@ -1,9 +1,14 @@
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 import pandas as pd
-import random
 import os
+import random
 
 app = Flask(__name__)
+
+# Folder to store uploaded files
+UPLOAD_FOLDER = 'uploads'
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 
 # Define entity_unit_map directly in the app.py file
 entity_unit_map = {
@@ -24,51 +29,53 @@ def get_random_unit(entity_name):
         return random.choice(list(units))
     return 'unknown unit'
 
-# Example function to predict entity value (replace with actual logic)
-def predict_entity_value(entity_name):
-    return hash(entity_name) % 100  # Dummy prediction logic
+# Dummy predictor function (replace this with your actual model)
+def predictor(image_link, category_id, entity_name):
+    # Example prediction logic using a random choice for entity units
+    predicted_value = hash(entity_name) % 100  # Dummy prediction logic (you can replace with real model logic)
+    unit = get_random_unit(entity_name)
+    return f"{predicted_value} {unit}"
 
+# Route for the home page
 @app.route('/')
-def index():
+def home():
     return render_template('index.html')
 
+# Route to handle form submission and file upload
 @app.route('/predict', methods=['POST'])
 def predict():
-    # Retrieve form data
-    image_link = request.form.get('image_link', '')
+    # Get data from the form
+    image_link = request.form['image_link']
+    category_id = request.form['category_id']
+    entity_name = request.form['entity_name']
     
-    # Check if a file is uploaded
-    if 'csv_file' not in request.files:
-        return "No file uploaded", 400
-    
-    file = request.files['csv_file']
-    if file.filename == '':
-        return "No file selected", 400
+    # Check if a CSV file was uploaded
+    csv_file = request.files.get('csv_file')
+    if csv_file and csv_file.filename != '':
+        filepath = os.path.join(UPLOAD_FOLDER, csv_file.filename)
+        csv_file.save(filepath)
+        
+        # Load CSV file and perform predictions
+        data = pd.read_csv(filepath)
+        
+        # Check if the necessary columns exist
+        if not {'index', 'image_link', 'group_id', 'entity_name'}.issubset(data.columns):
+            return "CSV must contain 'index', 'image_link', 'group_id', and 'entity_name' columns", 400
+        
+        # Apply the predictor function to each row
+        data['prediction'] = data.apply(
+            lambda row: predictor(row['image_link'], row['group_id'], row['entity_name']), axis=1)
+        
+        # Save the predictions to a new CSV file
+        output_filename = os.path.join(UPLOAD_FOLDER, 'test_out.csv')
+        data[['index', 'prediction']].to_csv(output_filename, index=False)
+        
+        return f"Predictions saved to {output_filename}."
 
-    if file:
-        # Save the file to process
-        file_path = os.path.join('uploads', file.filename)
-        file.save(file_path)
-        
-        # Load CSV and process it
-        data = pd.read_csv(file_path)
-        
-        # Check if required columns are present
-        if not {'index', 'entity_name'}.issubset(data.columns):
-            return "CSV must contain 'index' and 'entity_name' columns", 400
-        
-        # Generate predictions
-        data['unit'] = data['entity_name'].apply(get_random_unit)
-        data['prediction_value'] = data['entity_name'].apply(predict_entity_value) * 1.1  # Example operation
-        data['prediction_value'] = data['prediction_value'].astype(str)  # Convert prediction_value to string
-        data['prediction'] = [f"{x} {unit}" for x, unit in zip(data['prediction_value'], data['unit'])]
+    # If no CSV is uploaded, perform prediction on the input data from the form
+    prediction = predictor(image_link, category_id, entity_name)
+    return f"The predicted value for the entity is: {prediction}"
 
-        # Save results to test_out.csv without the group_id and entity_name columns
-        output_file = 'test_out.csv'
-        data[['index', 'prediction']].to_csv(output_file, index=False)
-        
-        return f"Prediction complete. Results saved in {output_file}."
-
+# Starting the Flask application
 if __name__ == "__main__":
-    os.makedirs('uploads', exist_ok=True)  # Create uploads directory if not exists
     app.run(debug=True)
