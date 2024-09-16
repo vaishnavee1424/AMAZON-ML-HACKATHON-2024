@@ -1,0 +1,11 @@
+entity_name,unit,prediction
+width,centimetre,0.10 centimetre
+height,metre,0.67 metre
+item_weight,ton,0.99 ton
+voltage,kilovolt,0.30 kilovolt
+item_volume,gallon,0.83 gallon
+depth,millimetre,0.82 millimetre
+wattage,kilowatt,0.27 kilowatt
+maximum_weight_recommendation,microgram,0.20 microgram
+height,millimetre,0.81 millimetre
+item_weight,ounce,0.06 ounce
